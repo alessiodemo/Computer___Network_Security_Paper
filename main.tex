@@ -1,0 +1,203 @@
+\documentclass[12pt, a4paper]{article}
+
+% ─── PACKAGES ────────────────────────────────────────────────────────────────
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[english]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{amsmath, amssymb}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{csquotes}
+\usepackage{tocloft}
+\usepackage{parskip}
+\usepackage{tabularx}
+\usepackage[style=ieee, backend=biber]{biblatex}
+\usepackage{tcolorbox}
+\newtcolorbox{infobox_env}{
+  colback=gray!5,
+  colframe=gray!75!black,
+  boxrule=0.5pt,
+  arc=4pt
+}
+
+% ─── PAGE GEOMETRY ───────────────────────────────────────────────────────────
+\geometry{
+  a4paper,
+  top=2.5cm,
+  bottom=2.5cm,
+  left=3cm,
+  right=2.5cm,
+  headheight=14pt
+}
+
+% ─── COLORS ──────────────────────────────────────────────────────────────────
+\definecolor{unipd-red}{RGB}{155, 0, 20}   % UNIPD institutional red
+\definecolor{code-bg}{RGB}{245, 245, 245}
+\definecolor{code-gray}{RGB}{100, 100, 100}
+
+% ─── HYPERREF SETUP ──────────────────────────────────────────────────────────
+\hypersetup{
+  colorlinks = true,
+  linkcolor  = unipd-red,
+  citecolor  = unipd-red,
+  urlcolor   = unipd-red,
+  pdftitle   = {NVIDIAScape: Container Escape via LD\_PRELOAD Injection},
+  pdfauthor  = {Alessio Demo},
+}
+
+% ─── SECTION FORMATTING ──────────────────────────────────────────────────────
+\titleformat{\section}
+  {\large\bfseries\color{unipd-red}}
+  {\thesection}{1em}{}[\titlerule]
+
+\titleformat{\subsection}
+  {\normalsize\bfseries}
+  {\thesubsection}{1em}{}
+
+\titleformat{\subsubsection}
+  {\normalsize\itshape}
+  {\thesubsubsection}{1em}{}
+
+% ─── HEADER / FOOTER ─────────────────────────────────────────────────────────
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\textit{NVIDIAScape: Container Escape via LD\_PRELOAD Injection}}
+\fancyhead[R]{\small\textit{Alessio Demo}}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% ─── CODE LISTING STYLE ──────────────────────────────────────────────────────
+\lstdefinestyle{mycode}{
+  backgroundcolor = \color{code-bg},
+  basicstyle      = \ttfamily\footnotesize,
+  breaklines      = true,
+  captionpos      = b,
+  commentstyle    = \color{code-gray}\itshape,
+  keywordstyle    = \color{unipd-red}\bfseries,
+  stringstyle     = \color{teal},
+  numberstyle     = \tiny\color{code-gray},
+  numbers         = left,
+  numbersep       = 8pt,
+  frame           = single,
+  framerule       = 0.4pt,
+  rulecolor       = \color{code-gray},
+  tabsize         = 4,
+  showstringspaces= false,
+}
+\lstset{style=mycode}
+
+% ─── LINE SPACING ────────────────────────────────────────────────────────────
+\onehalfspacing
+
+% ─── TOC STYLING ─────────────────────────────────────────────────────────────
+\renewcommand{\cftsecfont}{\bfseries}
+\renewcommand{\cftsecpagefont}{\bfseries}
+\setlength{\cftbeforesecskip}{4pt}
+
+
+% ─── Bibliography ─────────────────────────────────────────────────────────────
+\addbibresource{ref.bib}
+% ═════════════════════════════════════════════════════════════════════════════
+%  DOCUMENT START
+% ═════════════════════════════════════════════════════════════════════════════
+\begin{document}
+
+% ─── TITLE PAGE ──────────────────────────────────────────────────────────────
+% ─── TITLE PAGE ──────────────────────────────────────────────────────────────
+\begin{titlepage}
+  \thispagestyle{empty}
+
+  % ── Top block: logo + university info ──────────────────────────────────────
+  \begin{minipage}[t]{0.20\textwidth}
+    \vspace{0pt}
+    \includegraphics[width=\linewidth]{images/unipd-logo.png}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{0.78\textwidth}
+    \vspace{4pt}
+    {\large University of Padua}\\
+    {\large\textbf{Department of Information Engineering}}\\[4pt]
+    \rule{\linewidth}{0.5pt}\\[6pt]
+    {\large Master Degree in Computer Engineering}
+  \end{minipage}
+
+  \vspace{0pt plus 0.8fill}   % <-- sostituisce il primo \vfill
+
+  % ── Essay label + title block ─────────────────────────────────────────────
+  \begin{flushleft}
+    {\large Computer \& Networks Security essay}\\[0.4cm]
+    {\LARGE\bfseries\color{unipd-red}
+      NVIDIAScape: Container Escape via LD\_PRELOAD Injection
+    \par}
+    \vspace{0.4cm}
+    {\large May 2026}
+  \end{flushleft}
+
+  \vspace{0pt plus 1.2fill}
+
+  % ── Candidate / Supervisor block ───────────────────────────────────────────
+  \noindent
+  \begin{minipage}[b]{0.45\textwidth}
+    {\large Candidate:}\\[2pt]
+    {\large Alessio Demo}\\
+    {\large Student ID: 2142885}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[b]{0.45\textwidth}
+    \raggedleft
+    {\large Professor:}\\[2pt]
+    {\large Mauro Migliardi}
+  \end{minipage}
+
+\end{titlepage}
+
+% ─── ABSTRACT ────────────────────────────────────────────────────────────────
+\newpage
+\input{sections/00-abstract}
+
+% ─── TABLE OF CONTENTS ───────────────────────────────────────────────────────
+\newpage
+\tableofcontents
+
+% ─── MAIN BODY ───────────────────────────────────────────────────────────────
+\newpage
+\input{sections/01-introduction}
+
+\newpage
+\input{sections/02-background}
+
+\newpage
+\input{sections/03-technical-analysis}
+
+\newpage
+\input{sections/04-exploitation-mechanics}
+
+\newpage
+\input{sections/05-impact-assessment}
+
+\newpage
+\input{sections/06-mitigation-hardening}
+
+\newpage
+\input{sections/07-broader-implications}
+
+\newpage
+\input{sections/08-conclusion}
+
+% ─── References ──────────────────────────────────────────────────────────────
+\nocite{*}
+\printbibliography[heading=bibintoc, title={References}]
+
+\end{document}

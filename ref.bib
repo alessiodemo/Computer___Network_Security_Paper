@@ -1,0 +1,283 @@
+% ─── References for NVIDIAScape Paper (CVE-2025-23266) ───────────────────────
+
+% ── Official CVE & Security Advisories ───────────────────────────────────────
+
+@misc{nvd_cve_2025_23266,
+  author       = {{National Vulnerability Database}},
+  title        = {{CVE-2025-23266 Detail}},
+  year         = {2025},
+  howpublished = {NIST NVD},
+  url          = {https://nvd.nist.gov/vuln/detail/CVE-2025-23266},
+  note         = {Accessed: 2025}
+}
+
+@misc{nvidia_advisory_2025,
+  author       = {{NVIDIA Corporation}},
+  title        = {{NVIDIA Container Toolkit Security Bulletin — CVE-2025-23266}},
+  year         = {2025},
+  howpublished = {NVIDIA Product Security},
+  url          = {https://www.nvidia.com/en-us/security/},
+  note         = {Accessed: 2025}
+}
+
+@misc{nvd_cve_2024_0132,
+  author       = {{National Vulnerability Database}},
+  title        = {{CVE-2024-0132 Detail — NVIDIA Container Toolkit}},
+  year         = {2024},
+  howpublished = {NIST NVD},
+  url          = {https://nvd.nist.gov/vuln/detail/CVE-2024-0132},
+  note         = {Accessed: 2025}
+}
+
+@misc{nvd_cve_2024_21626,
+  author       = {{National Vulnerability Database}},
+  title        = {{CVE-2024-21626 Detail — runc Container Escape (Leaky Vessels)}},
+  year         = {2024},
+  howpublished = {NIST NVD},
+  url          = {https://nvd.nist.gov/vuln/detail/CVE-2024-21626},
+  note         = {Accessed: 2025}
+}
+
+@misc{nvd_cve_2019_5736,
+  author       = {{National Vulnerability Database}},
+  title        = {{CVE-2019-5736 Detail — runc Host Binary Overwrite}},
+  year         = {2019},
+  howpublished = {NIST NVD},
+  url          = {https://nvd.nist.gov/vuln/detail/CVE-2019-5736},
+  note         = {Accessed: 2025}
+}
+
+@misc{nvd_cve_2022_0492,
+  author       = {{National Vulnerability Database}},
+  title        = {{CVE-2022-0492 Detail — Linux Kernel cgroup v1 Container Escape}},
+  year         = {2022},
+  howpublished = {NIST NVD},
+  url          = {https://nvd.nist.gov/vuln/detail/CVE-2022-0492},
+  note         = {Accessed: 2025}
+}
+
+% ── NVIDIA Container Toolkit Documentation ────────────────────────────────────
+
+@misc{nvidia_ctk_docs,
+  author       = {{NVIDIA Corporation}},
+  title        = {{NVIDIA Container Toolkit Documentation}},
+  year         = {2025},
+  howpublished = {NVIDIA Developer Docs},
+  url          = {https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/index.html},
+  note         = {Accessed: 2025}
+}
+
+@misc{nvidia_ctk_github,
+  author       = {{NVIDIA Corporation}},
+  title        = {{nvidia-container-toolkit — GitHub Repository}},
+  year         = {2025},
+  howpublished = {GitHub},
+  url          = {https://github.com/NVIDIA/nvidia-container-toolkit},
+  note         = {Accessed: 2025}
+}
+
+@misc{nvidia_mig_docs,
+  author       = {{NVIDIA Corporation}},
+  title        = {{Multi-Instance GPU (MIG) User Guide}},
+  year         = {2024},
+  howpublished = {NVIDIA Developer Docs},
+  url          = {https://docs.nvidia.com/datacenter/tesla/mig-user-guide/index.html},
+  note         = {Accessed: 2025}
+}
+
+% ── OCI Specifications ────────────────────────────────────────────────────────
+
+@misc{oci_runtime_spec,
+  author       = {{Open Container Initiative}},
+  title        = {{OCI Runtime Specification — Hooks}},
+  year         = {2024},
+  howpublished = {Open Container Initiative},
+  url          = {https://github.com/opencontainers/runtime-spec/blob/main/config.md#posix-platform-hooks},
+  note         = {Accessed: 2025}
+}
+
+@misc{oci_image_spec,
+  author       = {{Open Container Initiative}},
+  title        = {{OCI Image Format Specification}},
+  year         = {2024},
+  howpublished = {Open Container Initiative},
+  url          = {https://github.com/opencontainers/image-spec},
+  note         = {Accessed: 2025}
+}
+
+% ── Linux Kernel & Dynamic Linker ─────────────────────────────────────────────
+
+@misc{linux_ldso_manpage,
+  author       = {{Linux man-pages project}},
+  title        = {{ld.so(8) — Linux Programmer's Manual}},
+  year         = {2024},
+  howpublished = {Linux Manual Pages},
+  url          = {https://man7.org/linux/man-pages/man8/ld.so.8.html},
+  note         = {Accessed: 2025}
+}
+
+@misc{linux_namespaces_manpage,
+  author       = {{Linux man-pages project}},
+  title        = {{namespaces(7) — Linux Programmer's Manual}},
+  year         = {2024},
+  howpublished = {Linux Manual Pages},
+  url          = {https://man7.org/linux/man-pages/man7/namespaces.7.html},
+  note         = {Accessed: 2025}
+}
+
+@misc{linux_capabilities_manpage,
+  author       = {{Linux man-pages project}},
+  title        = {{capabilities(7) — Linux Programmer's Manual}},
+  year         = {2024},
+  howpublished = {Linux Manual Pages},
+  url          = {https://man7.org/linux/man-pages/man7/capabilities.7.html},
+  note         = {Accessed: 2025}
+}
+
+@misc{linux_execve_manpage,
+  author       = {{Linux man-pages project}},
+  title        = {{execve(2) — Linux Programmer's Manual}},
+  year         = {2024},
+  howpublished = {Linux Manual Pages},
+  url          = {https://man7.org/linux/man-pages/man2/execve.2.html},
+  note         = {Accessed: 2025}
+}
+
+% ── Container Security Research ───────────────────────────────────────────────
+
+@article{sultan2019container,
+  author    = {Sultan, Sari and Ahmad, Imtiaz and Dimitriou, Tassos},
+  title     = {Container Security: Issues, Challenges, and the Road Ahead},
+  journal   = {IEEE Access},
+  volume    = {7},
+  pages     = {52976--52996},
+  year      = {2019},
+  doi       = {10.1109/ACCESS.2019.2911732},
+  url       = {https://ieeexplore.ieee.org/document/8693491}
+}
+
+@inproceedings{lin2018measurement,
+  author    = {Lin, Xin and Lei, Lingguang and Wang, Yuewu and Jing, Jiwu and Sun, Kun and Zhou, Quan},
+  title     = {A Measurement Study on Linux Container Security: Attacks and Countermeasures},
+  booktitle = {Proceedings of the 34th Annual Computer Security Applications Conference (ACSAC)},
+  year      = {2018},
+  pages     = {418--429},
+  doi       = {10.1145/3274694.3274720},
+  url       = {https://dl.acm.org/doi/10.1145/3274694.3274720}
+}
+
+@misc{leaky_vessels_disclosure,
+  author       = {{Snyk Security Research}},
+  title        = {{Leaky Vessels: Container Escapes in runc and BuildKit (CVE-2024-21626)}},
+  year         = {2024},
+  howpublished = {Snyk Blog},
+  url          = {https://snyk.io/blog/leaky-vessels-docker-runc-container-breakout-vulnerabilities/},
+  note         = {Accessed: 2025}
+}
+
+@misc{wiz_nvidia_2024,
+  author       = {{Wiz Research}},
+  title        = {{NVIDIA AI Vulnerability Deep Dive: CVE-2024-0132 Container Escape}},
+  year         = {2024},
+  howpublished = {Wiz Research Blog},
+  url          = {https://www.wiz.io/blog/nvidia-ai-vulnerability-deep-dive-cve-2024-0132},
+  note         = {Accessed: 2025}
+}
+
+% ── CVSS & Vulnerability Scoring ─────────────────────────────────────────────
+
+@misc{cvss_v31_spec,
+  author       = {{FIRST.org}},
+  title        = {{Common Vulnerability Scoring System v3.1 Specification Document}},
+  year         = {2019},
+  howpublished = {FIRST},
+  url          = {https://www.first.org/cvss/specification-document},
+  note         = {Accessed: 2025}
+}
+
+% ── Kubernetes & Cloud Security ───────────────────────────────────────────────
+
+@misc{k8s_security_docs,
+  author       = {{The Kubernetes Authors}},
+  title        = {{Kubernetes Security Documentation — Pod Security Standards}},
+  year         = {2025},
+  howpublished = {Kubernetes.io},
+  url          = {https://kubernetes.io/docs/concepts/security/pod-security-standards/},
+  note         = {Accessed: 2025}
+}
+
+@misc{k8s_device_plugin,
+  author       = {{The Kubernetes Authors}},
+  title        = {{Kubernetes Device Plugin Framework Documentation}},
+  year         = {2025},
+  howpublished = {Kubernetes.io},
+  url          = {https://kubernetes.io/docs/concepts/extend-kubernetes/compute-storage-net/device-plugins/},
+  note         = {Accessed: 2025}
+}
+
+% ── Confidential Computing ────────────────────────────────────────────────────
+
+@misc{nvidia_confidential_compute,
+  author       = {{NVIDIA Corporation}},
+  title        = {{NVIDIA Confidential Computing — Hopper Architecture}},
+  year         = {2024},
+  howpublished = {NVIDIA Developer Blog},
+  url          = {https://developer.nvidia.com/blog/confidential-computing-on-h100-gpus-for-secure-and-trustworthy-ai/},
+  note         = {Accessed: 2025}
+}
+
+% ── Regulatory & Compliance ───────────────────────────────────────────────────
+
+@misc{eu_ai_act,
+  author       = {{European Parliament and Council}},
+  title        = {{Regulation (EU) 2024/1689 — Artificial Intelligence Act}},
+  year         = {2024},
+  howpublished = {Official Journal of the European Union},
+  url          = {https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32024R1689},
+  note         = {Accessed: 2025}
+}
+
+% ── Container Device Interface ────────────────────────────────────────────────
+ 
+@misc{cdi_spec,
+  author       = {{CNCF Tags / Container Device Interface}},
+  title        = {{Container Device Interface (CDI) Specification}},
+  year         = {2024},
+  howpublished = {GitHub — cncf-tags/container-device-interface},
+  url          = {https://github.com/cncf-tags/container-device-interface},
+  note         = {Accessed: 2025}
+}
+
+% ── Container Runtime Security ────────────────────────────────────────────────
+ 
+@misc{docker_seccomp,
+  author       = {{Docker Inc.}},
+  title        = {{Seccomp Security Profiles for Docker}},
+  year         = {2024},
+  howpublished = {Docker Documentation},
+  url          = {https://docs.docker.com/engine/security/seccomp/},
+  note         = {Accessed: 2025}
+}
+
+@misc{apparmor_ubuntu,
+  author       = {{Canonical Ltd.}},
+  title        = {{AppArmor — Ubuntu Server Documentation}},
+  year         = {2024},
+  howpublished = {Ubuntu Documentation},
+  url          = {https://documentation.ubuntu.com/server/how-to/security/apparmor/},
+  note         = {Accessed: 2025}
+}
+
+% ── NIST Standards ────────────────────────────────────────────────────────────
+ 
+@techreport{nist_sp800_190,
+  author      = {Souppaya, Murugiah and Morello, John and Scarfone, Karen},
+  title       = {{Application Container Security Guide (NIST SP 800-190)}},
+  institution = {National Institute of Standards and Technology},
+  year        = {2017},
+  type        = {Special Publication},
+  number      = {800-190},
+  doi         = {10.6028/NIST.SP.800-190},
+  url         = {https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-190.pdf},
+  note        = {Accessed: 2025}
+}

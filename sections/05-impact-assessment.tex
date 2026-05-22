@@ -1,0 +1,62 @@
+\section{Impact Assessment}
+\label{sec:impact}
+
+% ~3.000 characters total across subsections
+
+\subsection{CVSS Score and Breakdown}
+\label{subsec:cvss}
+
+CVE-2025-23266 carries a \textbf{CVSS v3.1 Base Score of 9.0 (Critical)} \cite{nvd_cve_2025_23266, cvss_v31_spec}. The breakdown of the vector string is as follows:
+ 
+\begin{table}[H]
+\centering
+\caption{CVSS v3.1 Vector Breakdown for CVE-2025-23266}
+\label{tab:cvss}
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\textbf{Metric} & \textbf{Description} & \textbf{Value} \\
+\midrule
+Attack Vector (AV) & Attacker must have local access (inside a container) & Local (L) \\
+Attack Complexity (AC) & No special conditions; attack is reliably repeatable & Low (L) \\
+Privileges Required (PR) & Standard container user, no elevated privileges needed & Low (L) \\
+User Interaction (UI) & No victim interaction required; purely automated & None (N) \\
+Scope (S) & Impact escapes the vulnerable component (container) & Changed (C) \\
+Confidentiality (C) & Complete host confidentiality loss & High (H) \\
+Integrity (I) & Complete host integrity loss & High (H) \\
+Availability (A) & Host availability can be fully disrupted & High (H) \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+The \textbf{(Metric = Scope, Value = Changed)} tuple is particularly noteworthy. It reflects the fact that the vulnerability's impact transcends the security boundary of the initially vulnerable component (the container) and affects a separate, higher-privilege component (the host). This scope change is the defining characteristic of a container escape vulnerability and is the primary driver of the high base score.
+
+\subsection{Impact on Kubernetes and Docker GPU Environments}
+\label{subsec:k8s-impact}
+
+The vulnerability has significant implications across the two dominant GPU container deployment platforms.
+
+\paragraph{Docker.} In a standard Docker deployment with GPU support, the attack is straightforward as described in the exploit walkthrough (\ref{subsec:exploit-walkthrough}). Any user with the ability to run GPU-enabled containers on a host with the vulnerable toolkit can exploit the vulnerability. In practice, Docker is widely used for development workstations, on-premises GPU servers, and small-scale cloud deployments \cite{nvd_cve_2025_23266}.
+ 
+\paragraph{Kubernetes.} The impact in Kubernetes environments is potentially broader and more severe \cite{k8s_security_docs}. In a Kubernetes cluster with GPU node pools, the NVIDIA Container Toolkit is deployed as a DaemonSet on GPU nodes, making it universally present on all GPU-capable nodes \cite{k8s_device_plugin}. An attacker who can submit a Pod specification with GPU resource requests and arbitrary environment variables (which is a standard capability for any authenticated Kubernetes user with access to a GPU namespace) can exploit the vulnerability on any GPU node the pod is scheduled on.
+
+Moreover, Kubernetes introduces additional blast-radius concerns:
+\begin{itemize}
+  \item The compromised node's \texttt{kubelet} credentials can be extracted, potentially enabling lateral movement to the Kubernetes API server.
+  \item The node's service account tokens mounted into pods can be used to interact with the cluster's API.
+  \item In cloud-managed Kubernetes services (GKE, EKS, AKS), the node's cloud instance metadata endpoint may be accessible, potentially yielding cloud IAM credentials with broad permissions.
+\end{itemize}
+
+\subsection{Risk for LLM and AI Hosting Infrastructure}
+\label{subsec:ai-risk}
+
+The intersection of NVIDIAScape with modern AI infrastructure deserves particular emphasis. The past several years have seen explosive growth in GPU-enabled container deployments driven by large language model (LLM) training and inference workloads. Organisations such as cloud providers, AI startups, and research institutions routinely operate dense GPU clusters where many tenants share physical nodes.
+ 
+In this context, the threat model for NVIDIAScape is especially concerning for the following reasons:
+ 
+\paragraph{High-value targets on GPU nodes.} GPU nodes hosting LLM inference typically contain: proprietary model weights (often representing millions of dollars in training costs), API keys and secrets injected via environment variables into inference containers, customer data submitted for inference, and billing and identity information. A container escape on such a node yields immediate access to all of this.
+ 
+\paragraph{Shared GPU nodes in inference clusters.} Large-scale LLM serving infrastructure frequently uses bin-packing strategies that place multiple customer workloads on the same GPU node to maximise utilisation. This maximises the value of a single successful container escape.
+ 
+\paragraph{Automated and autoscaling deployments.} The automated nature of cloud-native GPU deployments means that vulnerable nodes may be continuously provisioned and deprovisioned without manual security review. Unless patch deployment is automated, vulnerable versions can persist in production for extended periods.
+ 
+\paragraph{Regulatory and compliance implications.} Organisations in regulated industries (healthcare, finance) that use GPU cloud infrastructure for AI workloads face additional exposure from NVIDIAScape: a successful exploit could result in cross-tenant data leakage that triggers data breach notification obligations under GDPR, HIPAA, or SOC 2 requirements.

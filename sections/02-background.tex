@@ -1,0 +1,70 @@
+\section{Background and Related Work}
+\label{sec:background}
+
+% ~4.000 characters total across subsections
+
+\subsection{Linux Containers and Isolation Primitives}
+\label{subsec:containers}
+
+Modern Linux containers do not rely on a distinct kernel or hardware boundary as virtual machines do. Instead, they exploit a layered set of kernel features to create the \textit{illusion} of isolation while sharing the same underlying kernel with the host \cite{sultan2019container}.
+
+\paragraph{Namespaces.} Linux namespaces partition global resources into per-process views \cite{linux_namespaces_manpage}. The key namespaces for container isolation are: \texttt{pid} (process identifiers), \texttt{net} (network stack), \texttt{mnt} (filesystem mount points), \texttt{uts} (hostname and domain name), \texttt{ipc} (inter-process communication), and \texttt{user} (user and group identifiers). A process confined within these namespaces cannot observe or interact with resources belonging to other namespaces.
+
+\paragraph{Control Groups (cgroups).} Cgroups enforce resource accounting and limits — CPU time, memory, I/O bandwidth, and device access. They do not provide security isolation, but prevent resource exhaustion attacks and can restrict device access via the \texttt{devices} cgroup controller.
+
+\paragraph{Seccomp.} The Secure Computing Mode (\texttt{seccomp}) allows fine-grained filtering of system calls. Container runtimes like Docker apply a default seccomp profile that blocks hundreds of potentially dangerous syscalls from within the container.
+
+\paragraph{Capabilities.} Linux capabilities decompose the monolithic root privilege into discrete units (e.g., \texttt{CAP\_NET\_ADMIN}, \texttt{CAP\_SYS\_PTRACE}) \cite{linux_capabilities_manpage}. Containers typically run with a reduced capability set, preventing common privilege escalation techniques that require specific capabilities.
+These primitives form a defence-in-depth stack \cite{lin2018measurement, nist_sp800_190}, however their security guarantees are only as strong as the correctness of the kernel implementation and the integrity of the privileged processes that configure and manage the container lifecycle.
+When a privileged process outside the container namespace interacts with untrusted input from within it (as in the case of NVIDIAScape) the isolation boundary can be subverted without any kernel vulnerability being required.
+
+\subsection{The NVIDIA Container Toolkit}
+\label{subsec:nvidia-ctk}
+
+The NVIDIA Container Toolkit is an open-source project that enables NVIDIA GPU access for containerised workloads \cite{nvidia_ctk_github}. It consists of several components:
+\begin{itemize}
+  \item \textbf{libnvidia-container}: A shared library that performs the actual GPU device configuration.
+  \item \textbf{nvidia-container-runtime}: A wrapper around standard OCI-compatible runtimes (e.g., \texttt{runc}) that injects NVIDIA-specific configuration.
+  \item \textbf{nvidia-ctk}: The CLI tool and hook binary used to configure GPU access at container startup.
+\end{itemize}
+The toolkit integrates with the Open Container Initiative (OCI) specification through the \textbf{OCI hook} mechanism \cite{oci_runtime_spec, oci_image_spec}. OCI hooks are executable programs invoked by the container runtime at defined lifecycle points — \texttt{prestart}, \texttt{createRuntime}, \texttt{poststart}, and \texttt{poststop}. The NVIDIA \texttt{prestart} hook runs \textit{on the host}, with root privileges, before the container process starts. Its role is to mount the necessary NVIDIA device files and libraries into the container's filesystem \cite{nvidia_ctk_docs}.
+
+Critically, the hook process is spawned in a context that inherits environmental information from the container's configuration. As we shall examine in detail, this inheritance is the root cause of CVE-2025-23266.
+ 
+\begin{infobox_env}
+The OCI hook specification (\textit{runtime-spec}) does not mandate environment sanitisation for hook executables \cite{oci_runtime_spec}. The security burden is implicitly placed on hook implementors, who must explicitly clean their execution environment when operating with elevated privileges.
+\end{infobox_env}
+
+\subsection{The Dynamic Linker and \texttt{LD\_PRELOAD}}
+\label{subsec:ldpreload}
+
+The Linux dynamic linker (\texttt{ld.so} / \texttt{ld-linux.so}) is responsible for loading shared libraries required by an executable at runtime \cite{linux_ldso_manpage}. It resolves symbol dependencies, maps library segments into the process address space, and transfers control to the program's entry point.
+\paragraph{\texttt{LD\_PRELOAD}.} The \texttt{LD\_PRELOAD} environment variable is a feature of the dynamic linker that allows specifying one or more shared libraries to be loaded \textit{before all others}  \cite{linux_ldso_manpage}. Its legitimate uses include debugging, profiling (e.g., replacing \texttt{malloc} with a tracking allocator), and binary instrumentation.
+The security implications of \texttt{LD\_PRELOAD} are well-understood. The dynamic linker explicitly disables \texttt{LD\_PRELOAD} (and related variables such as \texttt{LD\_LIBRARY\_PATH} and \texttt{LD\_AUDIT}) when it detects that the effective user ID differs from the real user ID (the condition that characterises Set-UID programs \cite{linux_ldso_manpage}). This protection exists precisely because allowing untrusted \texttt{LD\_PRELOAD} injection into a privileged process would enable trivial privilege escalation.
+However, this protection is only automatic for Set-UID binaries. For a process that \textit{acquires} elevated privileges through other means (such as being spawned directly by a privileged parent) and does not explicitly sanitise its environment, \texttt{LD\_PRELOAD} remains fully operative \cite{linux_execve_manpage}. This is the precise gap that NVIDIAScape exploits.
+
+\begin{lstlisting}[language=bash, caption={The dynamic linker's LD\_PRELOAD security bypass for SUID binaries — not applicable when privilege is inherited from parent process.}]
+# For a SUID binary, the linker ignores LD_PRELOAD:
+$ ls -la /usr/bin/sudo
+-rwsr-xr-x 1 root root ... /usr/bin/sudo
+$ LD_PRELOAD=/tmp/evil.so sudo whoami
+# LD_PRELOAD is silently ignored  (protection works)
+ 
+# But for a root-spawned non-SUID hook process:
+# The linker DOES honour LD_PRELOAD  (no automatic protection)
+\end{lstlisting}
+
+\subsection{Related Vulnerabilities}
+\label{subsec:related-vulns}
+
+NVIDIAScape is not an isolated incident. It belongs to a broader family of container escape vulnerabilities that share a common pattern: a privileged host-side component incorrectly trusts or inherits input from within the container boundary \cite{lin2018measurement}.
+
+\paragraph{CVE-2024-0132 — NVIDIA Container Toolkit (2024).} A related vulnerability in an earlier version of the NVIDIA Container Toolkit allowed a crafted container image to mount sensitive host paths via time-of-check/time-of-use (TOCTOU) race conditions in the toolkit's filesystem traversal logic \cite{nvd_cve_2024_0132, wiz_nvidia_2024}. Unlike CVE-2025-23266, CVE-2024-0132 exploited filesystem handling rather than environment inheritance, but the underlying theme (insufficient trust boundary enforcement in a privileged GPU management layer) is identical.
+
+\paragraph{Leaky Vessels (CVE-2024-21626 and related — runc, 2024).} The ``Leaky Vessels'' cluster of vulnerabilities, disclosed in January 2024, affected the \texttt{runc} container runtime \cite{nvd_cve_2024_21626, leaky_vessels_disclosure}. CVE-2024-21626 allowed an attacker to leak a file descriptor referencing the host filesystem root by exploiting the order of operations in \texttt{runc}'s process initialisation. This enabled container escape with minimal preconditions. Much like NVIDIAScape, the vulnerability required no kernel exploit (only exploitation of a privileged userspace component's incorrect handling of state that crossed the container boundary).
+
+\paragraph{CVE-2019-5736 — runc.} An earlier critical vulnerability in \texttt{runc} allowed a malicious container to overwrite the host \texttt{runc} binary by exploiting \texttt{/proc/self/exe} references during container execution \cite{nvd_cve_2019_5736}. The attacker could then execute arbitrary code as root the next time any container was started. This vulnerability established the now well-known principle that \textit{container runtime processes themselves are attack surface}.
+
+\paragraph{CVE-2022-0492 — cgroup v1.} This kernel vulnerability allowed container escape via \texttt{cgroup} release agent abuse when the container had a weakened security profile \cite{nvd_cve_2022_0492}. While a kernel-level vulnerability rather than a userspace toolkit flaw, it reinforces the point that GPU and system management toolkits that run without full security profiles (no AppArmor, no seccomp) remove critical layers of defence.
+
+These precedents collectively demonstrate that privileged host-side components managing container lifecycle (whether container runtimes, GPU toolkits, or storage drivers) represent a persistent and high-value attack surface that demands rigorous security engineering \cite{sultan2019container, lin2018measurement}.

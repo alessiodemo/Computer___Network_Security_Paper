@@ -1,0 +1,15 @@
+\thispagestyle{plain}
+\begin{center}
+  {\large\bfseries Abstract}
+\end{center}
+\noindent
+This essay analyses \textbf{NVIDIAScape} (CVE-2025-23266), a container-escape
+vulnerability affecting the NVIDIA Container Toolkit. The attack exploits the
+\texttt{LD\_PRELOAD} environment variable, injected from inside a container,
+to force the privileged host-side hook (\texttt{nvidia-ctk}) to load attacker-controlled
+shared libraries. The root cause lies in the unsafe inheritance of the container
+environment by a process running with root privileges on the host, in violation of
+the principle of least privilege and proper isolation boundaries. The paper describes also the
+attack surface, the exploitation chain, the underlying design flaws, and the
+remediation measures introduced by NVIDIA and the broader container-security
+ecosystem.
