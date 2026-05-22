@@ -14,6 +14,14 @@ The vulnerability affects versions of the NVIDIA Container Toolkit prior to the 
 CVE-2025-23266 does not require any kernel vulnerability, any special container privileges (e.g., \texttt{--privileged}), or any network access. The only prerequisite is that the attacker can run a container on a host equipped with the NVIDIA Container Toolkit (a standard precondition in any GPU cloud environment).
 \end{infobox_env}
 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=\textwidth]{images/nvidiacontainer.png}
+  \caption{NVIDIA Container Toolkit architecture and hook execution flow.}
+  \label{fig:nvidia-container}
+\end{figure}
+
+
 \subsection{Root Cause: Unsafe Environment Inheritance}
 \label{subsec:root-cause}
 
