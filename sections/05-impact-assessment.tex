@@ -6,7 +6,9 @@
 \subsection{CVSS Score and Breakdown}
 \label{subsec:cvss}
 
-CVE-2025-23266 carries a \textbf{CVSS v3.1 Base Score of 9.0 (Critical)} \cite{nvd_cve_2025_23266, cvss_v31_spec}. The breakdown of the vector string is as follows:
+The Common Vulnerability Scoring System (CVSS) is a standardised framework for rating the severity of security vulnerabilities, producing a numerical score from 0 to 10 based on a set of exploitability and impact metrics \cite{cvss_v31_spec}.
+
+CVE-2025-23266 carries a \textbf{CVSS v3.1 Base Score of 9.0 (Critical)} \cite{nvd_cve_2025_23266}. The breakdown of the vector string is as follows:
  
 \begin{table}[H]
 \centering
@@ -49,7 +51,7 @@ Moreover, Kubernetes introduces additional blast-radius concerns:
 \subsection{Risk for LLM and AI Hosting Infrastructure}
 \label{subsec:ai-risk}
 
-The intersection of NVIDIAScape with modern AI infrastructure deserves particular emphasis. The past several years have seen explosive growth in GPU-enabled container deployments driven by large language model (LLM) training and inference workloads. Organisations such as cloud providers, AI startups, and research institutions routinely operate dense GPU clusters where many tenants share physical nodes.
+The intersection of NVIDIAScape with modern AI infrastructure deserves particular emphasis: the past several years have seen explosive growth in GPU-enabled container deployments driven by large language model (LLM) training and inference workloads. Organisations such as cloud providers, AI startups, and research institutions routinely operate dense GPU clusters where many tenants share physical nodes.
  
 In this context, the threat model for NVIDIAScape is especially concerning for the following reasons:
  

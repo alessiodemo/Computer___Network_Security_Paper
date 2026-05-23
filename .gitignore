@@ -13,8 +13,8 @@
 *.toc
 *.xml
 *.gz
+*.pdf
 
 # Keep .tex, .pdf, images/
 !*.tex
-!*.pdf
 !*.bib
