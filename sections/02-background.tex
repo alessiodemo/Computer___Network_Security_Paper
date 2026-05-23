@@ -8,14 +8,15 @@
 
 Modern Linux containers do not rely on a distinct kernel or hardware boundary as virtual machines do. Instead, they exploit a layered set of kernel features to create the \textit{illusion} of isolation while sharing the same underlying kernel with the host \cite{sultan2019container}.
 
-\paragraph{Namespaces.} Linux namespaces partition global resources into per-process views \cite{linux_namespaces_manpage}. The key namespaces for container isolation are: \texttt{pid} (process identifiers), \texttt{net} (network stack), \texttt{mnt} (filesystem mount points), \texttt{uts} (hostname and domain name), \texttt{ipc} (inter-process communication), and \texttt{user} (user and group identifiers). A process confined within these namespaces cannot observe or interact with resources belonging to other namespaces.
+\paragraph{Namespaces.} Linux namespaces partition global resources into per-process views \cite{linux_namespaces_manpage}. The key namespaces for container isolation are: \texttt{pid} (process identifiers), \texttt{net} (network stack), \texttt{mnt} (filesystem mount points), \texttt{uts} (UNIX Timesharing System), \texttt{ipc} (inter-process communication), and \texttt{user} (user and group identifiers). A process confined within these namespaces cannot observe or interact with resources belonging to other namespaces.
 
-\paragraph{Control Groups (cgroups).} Cgroups enforce resource accounting and limits — CPU time, memory, I/O bandwidth, and device access. They do not provide security isolation, but prevent resource exhaustion attacks and can restrict device access via the \texttt{devices} cgroup controller.
+\paragraph{Control Groups (cgroups).} Cgroups enforce resource accounting and limits CPU time, memory, I/O bandwidth, and device access. They do not provide security isolation, but prevent resource exhaustion attacks and can restrict device access via the \texttt{devices} cgroup controller.
 
 \paragraph{Seccomp.} The Secure Computing Mode (\texttt{seccomp}) allows fine-grained filtering of system calls. Container runtimes like Docker apply a default seccomp profile that blocks hundreds of potentially dangerous syscalls from within the container.
 
 \paragraph{Capabilities.} Linux capabilities decompose the monolithic root privilege into discrete units (e.g., \texttt{CAP\_NET\_ADMIN}, \texttt{CAP\_SYS\_PTRACE}) \cite{linux_capabilities_manpage}. Containers typically run with a reduced capability set, preventing common privilege escalation techniques that require specific capabilities.
-These primitives form a defence-in-depth stack \cite{lin2018measurement, nist_sp800_190}, however their security guarantees are only as strong as the correctness of the kernel implementation and the integrity of the privileged processes that configure and manage the container lifecycle.
+
+These primitives form a defence-in-depth stack \cite{lin2018measurement} \cite{nist_sp800_190}, however their security guarantees are only as strong as the correctness of the kernel implementation and the integrity of the privileged processes that configure and manage the container lifecycle.
 When a privileged process outside the container namespace interacts with untrusted input from within it (as in the case of NVIDIAScape) the isolation boundary can be subverted without any kernel vulnerability being required.
 
 \subsection{The NVIDIA Container Toolkit}
@@ -27,7 +28,7 @@ The NVIDIA Container Toolkit is an open-source project that enables NVIDIA GPU a
   \item \textbf{nvidia-container-runtime}: A wrapper around standard OCI-compatible runtimes (e.g., \texttt{runc}) that injects NVIDIA-specific configuration.
   \item \textbf{nvidia-ctk}: The CLI tool and hook binary used to configure GPU access at container startup.
 \end{itemize}
-The toolkit integrates with the Open Container Initiative (OCI) specification through the \textbf{OCI hook} mechanism \cite{oci_runtime_spec, oci_image_spec}. OCI hooks are executable programs invoked by the container runtime at defined lifecycle points — \texttt{prestart}, \texttt{createRuntime}, \texttt{poststart}, and \texttt{poststop}. The NVIDIA \texttt{prestart} hook runs \textit{on the host}, with root privileges, before the container process starts. Its role is to mount the necessary NVIDIA device files and libraries into the container's filesystem \cite{nvidia_ctk_docs}.
+The toolkit integrates with the Open Container Initiative (OCI) specification through the \textbf{OCI hook} mechanism \cite{oci_runtime_spec} \cite{oci_image_spec}. OCI hooks are executable programs invoked by the container runtime at defined lifecycle points (\texttt{prestart}, \texttt{createRuntime}, \texttt{poststart}, and \texttt{poststop}). For instance the NVIDIA \texttt{prestart} hook runs \textit{on the host}, with root privileges, before the container process starts, its role is to mount the necessary NVIDIA device files and libraries into the container's filesystem \cite{nvidia_ctk_docs}.
 
 Critically, the hook process is spawned in a context that inherits environmental information from the container's configuration. As we shall examine in detail, this inheritance is the root cause of CVE-2025-23266.
  
