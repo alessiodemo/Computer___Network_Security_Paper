@@ -6,7 +6,7 @@
 \subsection{Vulnerability Description}
 \label{subsec:vuln-desc}
 
-CVE-2025-23266 as already seen is a \textbf{container escape vulnerability} in the NVIDIA Container Toolkit \cite{nvd_cve_2025_23266} \cite{nvidia_advisory_2025}. It was publicly disclosed in 2025 and assigned a CVSS v3.1 base score of \textbf{9.0 (Critical)} \cite{cvss_v31_spec}, reflecting the combination of high confidentiality, integrity, and availability impact at the host level, with the attack vector being local (within the container) but resulting in complete host compromise.
+CVE-2025-23266 is a \textbf{container escape vulnerability} in the NVIDIA Container Toolkit \cite{nvd_cve_2025_23266} \cite{nvidia_advisory_2025}. It was publicly disclosed in 2025 and assigned a CVSS v3.1 base score of \textbf{9.0 (Critical)} \cite{cvss_v31_spec}, reflecting the combination of high confidentiality, integrity, and availability impact at the host level, with the attack vector being local (within the container) but resulting in complete host compromise.
 
 The vulnerability affects versions of the NVIDIA Container Toolkit prior to the patched release and stems from a failure to sanitise the execution environment of the \texttt{nvidia-ctk} OCI hook process. Specifically, environment variables set within the container (including \texttt{LD\_PRELOAD}) are inherited by the hook process when it is invoked by the container runtime on the host. Since the hook process runs with root privileges on the host, this inheritance allows an attacker inside the container to force the loading of an arbitrary shared library into the host's privileged process space.
 
@@ -14,8 +14,7 @@ The vulnerability affects versions of the NVIDIA Container Toolkit prior to the 
 CVE-2025-23266 does not require any kernel vulnerability, any special container privileges (e.g., \texttt{--privileged}), or any network access. The only prerequisite is that the attacker can run a container on a host equipped with the NVIDIA Container Toolkit (a standard precondition in any GPU cloud environment).
 \end{infobox_env}
 
-Graphically we can represent the attack flow as follows:
-
+Figure~\ref{fig:nvidia-container} illustrates the attack flow.
 
 \begin{figure}[htbp]
   \centering
@@ -28,14 +27,14 @@ Graphically we can represent the attack flow as follows:
 \subsection{Root Cause: Unsafe Environment Inheritance}
 \label{subsec:root-cause}
 
-To understand the root cause precisely, we must examine how the OCI hook is invoked. When a container with GPU access is started, the container runtime (e.g., \texttt{runc} or \texttt{containerd}) reads the container's OCI bundle specification (\texttt{config.json}), which includes a list of hooks. For example the NVIDIA prestart hook entry looks approximately as follows:
+To understand the root cause precisely, we must examine how the OCI hook is invoked. When a container with GPU access is started, the container runtime (e.g., \texttt{runc} or \texttt{containerd}) reads the container's OCI bundle specification (\texttt{config.json}), which includes a list of hooks. For example, the NVIDIA \texttt{createContainer} hook entry looks approximately as follows:
 
 \begin{lstlisting}[language=bash, caption={Simplified OCI hook specification for nvidia-ctk (config.json excerpt).}]
 "hooks": {
-  "prestart": [
+  "createContainer": [
     {
       "path": "/usr/bin/nvidia-ctk",
-      "args": ["nvidia-ctk", "runtime", "hook", "prestart"],
+      "args": ["nvidia-ctk", "hook", "enable-cuda-compat"],
       "env": []
     }
   ]
@@ -68,7 +67,7 @@ Notably absent from this list are: kernel exploits, elevated container capabilit
 The following provides a conceptual, step-by-step walkthrough of the exploit chain.
 
 \begin{enumerate}
-  \item \textbf{Craft the malicious shared library.} The attacker writes a shared library containing a constructor function (a function annotated with \texttt{\_\_attribute\_\_((constructor))} in C) that executes the attacker's payload when the library is loaded. Because this runs before \texttt{main()}, it executes at the earliest possible moment in the host process lifecycle, before any security checks in the hook's application logic.
+  \item \textbf{Craft the malicious shared library.} The attacker writes a shared library with a constructor function (a function annotated with \texttt{\_\_attribute\_\_((constructor))} in C) that executes the attacker's payload when the library is loaded. Because this runs before \texttt{main()}, it executes at the earliest possible moment in the host process lifecycle, before any security checks in the hook's application logic.
  
 \begin{lstlisting}[language=C, caption={Pseudocode for the malicious shared library constructor.}]
 // evil.c -- compiled to evil.so
@@ -90,14 +89,15 @@ void payload(void) {
  
   \item \textbf{Set \texttt{LD\_PRELOAD} in the container environment.} When starting the container, the attacker sets the environment variable \texttt{LD\_PRELOAD} to the host-side path of \texttt{evil.so}. In Docker CLI syntax:
  
-\begin{lstlisting}[language=bash, caption={Container launch with injected LD\_PRELOAD.}]
-docker run --gpus all \
-  -e LD_PRELOAD=/mnt/shared/evil.so \
-  -v /host/shared:/mnt/shared \
-  attacker-image
-\end{lstlisting}
+  \begin{lstlisting}[language=bash, caption={Container launch with injected LD\_PRELOAD.}]
+  docker run --gpus all \
+    -e LD_PRELOAD=/mnt/shared/evil.so \
+    -v /host/shared:/mnt/shared \
+    attacker-image
+  \end{lstlisting}
  
-  \item \textbf{Hook invocation.} As part of the container startup sequence, the OCI runtime invokes the NVIDIA prestart hook (\texttt{nvidia-ctk runtime hook prestart}) on the host with root privileges. Due to the environment inheritance vulnerability, \texttt{LD\_PRELOAD=/mnt/shared/evil.so} is present in the hook's environment.
+  \item \textbf{Hook invocation.} As part of the container startup sequence, the OCI runtime invokes the NVIDIA \texttt{createContainer} hook (nvidia-ctk hook \texttt{enable-cuda-compat}) on the host with root privileges.
+  \\ Due to the environment inheritance vulnerability, the crafted library is present in the hook's environment.
  
   \item \textbf{Dynamic linker loads the malicious library.} The host's dynamic linker reads \texttt{LD\_PRELOAD} and maps \texttt{evil.so} into the hook process's address space before any standard libraries. The constructor function executes immediately.
  

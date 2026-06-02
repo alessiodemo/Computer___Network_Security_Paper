@@ -6,7 +6,7 @@
 
 NVIDIA released a patched version of the Container Toolkit that directly addresses the environment variable inheritance flaw. The fix introduces explicit environment sanitisation in the hook process startup path. Specifically, the patched code constructs a minimal, explicitly defined environment array before executing the hook's privileged operations, ensuring that variables such as \texttt{LD\_PRELOAD}, \texttt{LD\_LIBRARY\_PATH}, \texttt{LD\_AUDIT}, and other dynamic linker control variables are stripped from the hook's execution environment regardless of what the container configuration specifies.
  
-\paragraph{Recommended action.} All operators of GPU-enabled container infrastructure should immediately upgrade the NVIDIA Container Toolkit to the patched version. The upgrade process involves updating the \texttt{libnvidia-container}, \texttt{nvidia-container-toolkit}, and \texttt{nvidia-container-runtime} packages and restarting the container runtime daemon.
+\paragraph{Recommended action.} All operators of GPU-enabled container infrastructure should immediately upgrade the NVIDIA Container Toolkit to the patched version.\\ The upgrade process involves the \texttt{libnvidia-container}, \texttt{nvidia-container-toolkit}, and \texttt{nvidia-container-runtime} packages and restarting the container runtime daemon.
 
 \begin{lstlisting}[language=bash, caption={Package upgrade commands for common Linux distributions.}]
 # Debian/Ubuntu
@@ -68,7 +68,7 @@ An alternative approach is to use \texttt{clearenv()} to remove all environment 
 \subsection{Defence-in-Depth}
 \label{subsec:defense-in-depth}
 
-Patching the toolkit and sanitising execution environments address the specific vulnerability, but a robust security posture requires defence-in-depth \cite{nist_sp800_190}(multiple independent layers of controls that limit the impact of any single failure).
+Patching the toolkit and sanitising execution environments address the specific vulnerability, but a robust security posture requires defence-in-depth \cite{nist_sp800_190} (multiple independent layers of controls that limit the impact of any single failure).
  
 \paragraph{Seccomp profiles.} The \texttt{nvidia-ctk} hook process should be subject to a restrictive seccomp profile that allows only the system calls strictly necessary for its GPU configuration operations. At a minimum, this profile should block \texttt{execve()} with arbitrary arguments, preventing the hook from spawning attacker-controlled child processes. Docker and Kubernetes support custom seccomp profiles that can be applied to specific components \cite{docker_seccomp} \cite{k8s_security_docs}.
  
