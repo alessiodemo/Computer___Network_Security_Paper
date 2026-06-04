@@ -22,11 +22,12 @@ When a privileged process outside the container namespace interacts with untrust
 \subsection{The NVIDIA Container Toolkit}
 \label{subsec:nvidia-ctk}
 
-The NVIDIA Container Toolkit is an open-source project that enables NVIDIA GPU access for containerised workloads \cite{nvidia_ctk_github}. It consists of several components:
+The NVIDIA Container Toolkit is an open-source project that enables NVIDIA GPU access for containerised workloads \cite{nvidia_ctk_github}. The Container NVIDIA Toolkit stack includes several components:
 \begin{itemize}
-  \item \textbf{libnvidia-container}: A shared library that performs the actual GPU device configuration.
-  \item \textbf{nvidia-container-runtime}: A wrapper around standard OCI-compatible runtimes (e.g., \texttt{runc}) that injects NVIDIA-specific configuration.
-  \item \textbf{nvidia-ctk}: The CLI tool and hook binary used to configure GPU access at container startup.
+  \item NVIDIA Container runtime (\textbf{nvidia-container-runtime}): Takes a \texttt{runc} specification as input, injects the NVIDIA container runtime hook and then calls out to the native \texttt{runc}, passing it the modified \texttt{runc} specification with that hook set.
+  \item NVIDIA Container runtime hook (\textbf{nvidia-container-toolkit} / \textbf{nvidia-container-runtime-hook}): the hook is included in the \textbf{nvidia-container-toolkit} package. The hook is invoked by \texttt{runc} after a container has been created, but before it has been started, and is given access to the \texttt{config.json} associated with the container.
+  It then takes information contained in the config.json and uses it to invoke the nvidia-container-cli CLI with an appropriate set of flags
+  \item NVIDIA Container Library and CLI (\textbf{libnvidia-container1} and \\ \textbf{nvidia-container-cli}): responsible to provide a library and command-line interface to configure Linux containers leveraging NVIDIA GPUs.
 \end{itemize}
 The toolkit integrates with the Open Container Initiative (OCI) specification through the \textbf{OCI hook} mechanism \cite{oci_runtime_spec} \cite{oci_image_spec}. OCI hooks are executable programs invoked by the container runtime at defined lifecycle points (\texttt{createRuntime}, \texttt{createContainer}, \texttt{startContainer}, \texttt{poststart}, and \texttt{poststop}); the older \texttt{prestart} hook was deprecated in OCI Runtime Spec v1.1 in favour of these more granular alternatives. The NVIDIA Container Toolkit registers a \texttt{createContainer} hook that runs as a privileged process \textit{on the host}, before the container's \texttt{pivot\_root} operation but after its mount namespace has been created; its role is to mount the necessary NVIDIA device files and libraries into the container's filesystem \cite{nvidia_ctk_docs}.
 
